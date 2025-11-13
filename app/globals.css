@@ -1,26 +1,259 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 :root {
+  /* Professional corporate color palette */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1a2a4a;
+  --card: #ffffff;
+  --card-foreground: #1a2a4a;
+  --popover: #ffffff;
+  --popover-foreground: #1a2a4a;
+  --primary: #1a3a6b;
+  --primary-light: #e8f0fb;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f7fa;
+  --secondary-foreground: #3d4f66;
+  --muted: #f0f2f5;
+  --muted-foreground: #6b7280;
+  --accent: #1a7f7e;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #f9fafb;
+  --ring: #1a3a6b;
+  --neutral-50: #f9fafb;
+  --neutral-100: #f3f4f6;
+  --neutral-200: #e5e7eb;
+  --neutral-300: #d1d5db;
+  --neutral-400: #9ca3af;
+  --neutral-500: #6b7280;
+  --neutral-600: #4b5563;
+  --neutral-700: #374151;
+  --success: #059669;
+  --warning: #d97706;
+  /* Reduced border radius for corporate look */
+  --radius: 0.25rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1a2a4a;
+  --sidebar-primary: #1a3a6b;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f7fa;
+  --sidebar-accent-foreground: #1a2a4a;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #1a3a6b;
+}
+
+.dark {
+  --background: #0f1419;
+  --foreground: #e5e7eb;
+  --card: #1a2332;
+  --card-foreground: #e5e7eb;
+  --popover: #1a2332;
+  --popover-foreground: #e5e7eb;
+  --primary: #60a5fa;
+  --primary-foreground: #0f1419;
+  --secondary: #2d3a4a;
+  --secondary-foreground: #e5e7eb;
+  --muted: #374151;
+  --muted-foreground: #9ca3af;
+  --accent: #14b8a6;
+  --accent-foreground: #0f1419;
+  --destructive: #f87171;
+  --destructive-foreground: #0f1419;
+  --border: #2d3a4a;
+  --input: #1f2a37;
+  --ring: #60a5fa;
+  --sidebar: #1a2332;
+  --sidebar-foreground: #e5e7eb;
+  --sidebar-primary: #60a5fa;
+  --sidebar-primary-foreground: #0f1419;
+  --sidebar-accent: #2d3a4a;
+  --sidebar-accent-foreground: #e5e7eb;
+  --sidebar-border: #374151;
+  --sidebar-ring: #60a5fa;
 }
 
 @theme inline {
+  /* Updated font-sans to use CSS variable --font-sans from Poppins */
+  --font-sans: var(--font-sans);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  /* Force light mode - prevent system dark mode */
+  html.light,
+  html.light body {
+    color-scheme: light;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    html:not(.dark) {
+      color-scheme: light;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .container-custom {
+    @apply max-w-6xl mx-auto px-4;
+  }
+
+  .card {
+    @apply bg-white border border-neutral-200 rounded p-6 shadow-sm hover:shadow-md transition-shadow;
+  }
+
+  .button-primary {
+    @apply px-4 py-2 bg-primary text-white rounded font-medium hover:bg-[#0f2a51] transition-colors;
+  }
+
+  .button-secondary {
+    @apply px-4 py-2 bg-neutral-100 text-foreground border border-neutral-200 rounded font-medium hover:bg-neutral-50 transition-colors;
+  }
+}
+
+@layer utilities {
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -10px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+    to {
+      opacity: 0;
+      transform: translate(-50%, -10px);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+    }
+  }
+
+  @keyframes scaleDown {
+    from {
+      transform: scale(1);
+      opacity: 1;
+    }
+    to {
+      transform: scale(0.85);
+      opacity: 0.9;
+    }
+  }
+
+  @keyframes scaleUp {
+    from {
+      transform: scale(0.85);
+      opacity: 0.9;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes morphRound {
+    0% {
+      border-radius: 9999px;
+    }
+    50% {
+      border-radius: 1rem;
+    }
+    100% {
+      border-radius: 1rem;
+    }
+  }
+
+  @keyframes morphPill {
+    0% {
+      border-radius: 1rem;
+    }
+    50% {
+      border-radius: 9999px;
+    }
+    100% {
+      border-radius: 9999px;
+    }
+  }
+
+  .animate-slide-down {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-scale-down {
+    animation: scaleDown 0.3s ease-out;
+  }
+
+  .animate-scale-up {
+    animation: scaleUp 0.3s ease-out;
+  }
+
+  .animate-morph-round {
+    animation: morphRound 0.5s ease-out;
+  }
+
+  .animate-morph-pill {
+    animation: morphPill 0.5s ease-out;
+  }
 }
