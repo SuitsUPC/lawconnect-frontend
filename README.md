@@ -84,23 +84,27 @@ Ver [ENDPOINTS_MAP.md](./ENDPOINTS_MAP.md) para el mapeo completo de endpoints.
 
 ### Variables de Entorno
 
-Crear `.env.local`:
+**IMPORTANTE**: La variable de entorno `NEXT_PUBLIC_API_URL` es **obligatoria**. 
+
+Crear `.env.local` en la raíz del proyecto:
 
 ```env
-# API Gateway (por defecto: http://localhost:8080)
+# URL del API Gateway (obligatorio)
 NEXT_PUBLIC_API_URL=http://localhost:8080
 ```
 
-### Datos Mock
+También puedes copiar el archivo de ejemplo:
+```bash
+cp .env.example .env.local
+```
 
-El frontend tiene **fallback automático a datos mock** si el backend no está disponible:
+Luego edita `.env.local` con la URL correcta de tu backend.
 
-- ✅ `SearchResults` - 6 abogados de ejemplo
-- ✅ `CasesList` - 6 casos de ejemplo  
-- ✅ `MessagesList` - Conversaciones de ejemplo
-- ✅ `ChatWindow` - Mensajes de ejemplo
+### Configuración Requerida
 
-Esto permite desarrollar el frontend **independientemente** del backend.
+El frontend **requiere** que la variable de entorno `NEXT_PUBLIC_API_URL` esté configurada. Sin esta variable, la aplicación no iniciará.
+
+Asegúrate de tener tu backend corriendo y configurar la URL correcta en `.env.local`.
 
 ## 🎨 Características
 
