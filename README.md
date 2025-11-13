@@ -185,10 +185,23 @@ El frontend incluye datos mock integrados, por lo que puedes probar todas las fu
 
 ### Errores de CORS
 
-El backend debe permitir:
-- Origin: `http://localhost:3000`
-- Headers: `Content-Type, Authorization`
-- Methods: `GET, POST, PUT, DELETE, OPTIONS`
+Si ves un error como:
+```
+Access to XMLHttpRequest ... has been blocked by CORS policy
+```
+
+El backend debe configurar CORS para permitir peticiones desde el frontend. El backend debe permitir:
+
+- **Origin**: `http://localhost:3000` o `http://localhost:3001` (según el puerto donde corra Next.js)
+- **Headers**: `Content-Type, Authorization`
+- **Methods**: `GET, POST, PUT, DELETE, OPTIONS`
+
+**Configuración típica en Spring Boot:**
+```java
+@CrossOrigin(origins = "http://localhost:3000,http://localhost:3001")
+```
+
+O en la configuración global de CORS del API Gateway.
 
 ### No se muestran datos
 

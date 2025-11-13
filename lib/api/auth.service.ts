@@ -3,7 +3,7 @@ import apiClient from './config';
 export interface SignUpRequest {
   username: string;
   password: string;
-  roles: string[];
+  role: string; // El backend espera 'role' (singular) como string, no 'roles' (plural) como array
 }
 
 export interface SignInRequest {

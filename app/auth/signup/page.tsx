@@ -46,7 +46,7 @@ function SignupPage() {
       await authService.signUp({
         username: formData.username,
         password: formData.password,
-        roles: [formData.userType],
+        role: formData.userType, // El backend espera 'role' como string, no 'roles' como array
       })
 
       toast({

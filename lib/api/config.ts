@@ -1,7 +1,16 @@
 import axios from 'axios';
 
-// URL base del API Gateway
+// URL base del API Gateway - debe estar definida en las variables de entorno
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// Validación y logging en desarrollo
+if (typeof window !== 'undefined' && !API_BASE_URL) {
+  console.error('⚠️ NEXT_PUBLIC_API_URL no está definida. Verifica tu archivo .env.local');
+}
+
+if (typeof window !== 'undefined' && API_BASE_URL) {
+  console.log('🔗 API Base URL:', API_BASE_URL);
+}
 
 // Crear instancia de axios con configuración base
 const apiClient = axios.create({
