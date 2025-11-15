@@ -1,19 +1,28 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/navbar"
 import { Button } from "@/components/ui/button"
-import { Search, Briefcase, TrendingUp, Users, FileText, MessageSquare, Clock, Plus } from "lucide-react"
-import { casesService, authService, type CaseResource } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
+import { Search, Briefcase, TrendingUp, Users, FileText, MessageSquare, Clock, Plus, MapPin, Phone } from "lucide-react"
+import { casesService, authService, profilesService, type CaseResource, type LawyerResource } from "@/lib/api"
 
 function Home() {
   const router = useRouter()
+  const { toast } = useToast()
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
   const [user, setUser] = useState<any>(null)
   const [recentCases, setRecentCases] = useState<CaseResource[]>([])
+  const [userCases, setUserCases] = useState<CaseResource[]>([])
   const [loadingCases, setLoadingCases] = useState(true)
+  const [recommendations, setRecommendations] = useState<(CaseResource | LawyerResource)[]>([])
+  const [recommendationType, setRecommendationType] = useState<"cases" | "lawyers" | null>(null)
+  const [recommendationCase, setRecommendationCase] = useState<CaseResource | null>(null)
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false)
+  const [recommendationActionLoading, setRecommendationActionLoading] = useState(false)
+  const [currentRecommendationIndex, setCurrentRecommendationIndex] = useState(0)
 
   useEffect(() => {
     const token = localStorage.getItem("authToken")
@@ -48,15 +57,166 @@ function Home() {
         cases = await casesService.getAllCases()
       }
       
+      setUserCases(cases)
       setRecentCases(cases.slice(0, 3)) // Mostrar solo los 3 más recientes
+      await loadRecommendations(currentUser, cases)
     } catch (error) {
       console.error("Error loading cases:", error)
       setRecentCases([])
+      setUserCases([])
+      setRecommendations([])
     } finally {
       setLoadingCases(false)
     }
   }
 
+  const loadRecommendations = async (currentUser: any, cachedCases?: CaseResource[]) => {
+    const userRole = currentUser.roles?.[0] || currentUser.role || "ROLE_CLIENT"
+    setLoadingRecommendations(true)
+    setCurrentRecommendationIndex(0)
+    try {
+      if (userRole === "ROLE_LAWYER") {
+        const suggestedCases = await casesService.getSuggestedCases(currentUser.id)
+        setRecommendations(suggestedCases)
+        setRecommendationType("cases")
+        setRecommendationCase(null)
+      } else if (userRole === "ROLE_CLIENT") {
+        const cases = cachedCases ?? (await casesService.getCasesByClient(currentUser.id))
+        const activeCase =
+          cases.find((caseItem) => caseItem.status === "OPEN" || caseItem.status === "EVALUATION") || cases[0] || null
+        setRecommendationCase(activeCase)
+        if (!activeCase) {
+          setRecommendations([])
+          setRecommendationType("lawyers")
+          return
+        }
+
+        const [lawyers, invitations] = await Promise.all([
+          profilesService.getAllLawyers(),
+          casesService.getInvitationsByCase(activeCase.id),
+        ])
+
+        const invitedLawyerIds = new Set(invitations.map((invitation) => invitation.lawyerId))
+        const availableLawyers = lawyers.filter((lawyer) => !invitedLawyerIds.has(lawyer.userId))
+
+        setRecommendations(availableLawyers)
+        setRecommendationType("lawyers")
+      } else {
+        setRecommendations([])
+        setRecommendationType(null)
+        setRecommendationCase(null)
+      }
+    } catch (error) {
+      console.error("Error loading recommendations:", error)
+      setRecommendations([])
+      setRecommendationCase(null)
+    } finally {
+      setLoadingRecommendations(false)
+    }
+  }
+
+  const currentRecommendation = useMemo(() => {
+    if (recommendations.length === 0) return null
+    return recommendations[Math.min(currentRecommendationIndex, recommendations.length - 1)]
+  }, [currentRecommendationIndex, recommendations])
+
+  const userRole = user?.roles?.[0] || user?.role || "ROLE_CLIENT"
+
+  const goToNextRecommendation = () => {
+    setRecommendations((prev) => {
+      const updated = prev.filter((_, idx) => idx !== currentRecommendationIndex)
+      return updated
+    })
+    setCurrentRecommendationIndex(0)
+  }
+
+  const handleRecommendationSkip = () => {
+    goToNextRecommendation()
+  }
+
+  const handleRecommendationAccept = async () => {
+    if (!user || !currentRecommendation) return
+    setRecommendationActionLoading(true)
+    try {
+      if (recommendationType === "cases" && "id" in currentRecommendation) {
+        await casesService.submitApplication({
+          caseId: currentRecommendation.id,
+          lawyerId: user.id,
+          message: "Estoy interesado en este caso",
+        })
+        toast({
+          title: "Postulación enviada",
+          description: "El cliente recibirá tu interés.",
+        })
+      } else if (recommendationType === "lawyers" && recommendationCase && "userId" in currentRecommendation) {
+        await casesService.inviteLawyer({
+          caseId: recommendationCase.id,
+          lawyerId: currentRecommendation.userId,
+          message: `Nos gustaría que revises el caso "${recommendationCase.title}".`,
+        })
+        toast({
+          title: "Invitación enviada",
+          description: `${currentRecommendation.fullName.firstname} recibirá tu invitación.`,
+        })
+      }
+      goToNextRecommendation()
+    } catch (error) {
+      console.error("Error performing recommendation action:", error)
+      toast({
+        title: "Error",
+        description: "No pudimos completar la acción. Intenta nuevamente.",
+        variant: "destructive",
+      })
+    } finally {
+      setRecommendationActionLoading(false)
+    }
+  }
+
+  const renderCaseRecommendation = (caseItem: CaseResource) => (
+    <div className="space-y-4">
+      <div>
+        <p className="text-xs uppercase tracking-wide text-slate-500 mb-1">Caso sugerido para ti</p>
+        <h3 className="text-2xl font-semibold text-gray-900">{caseItem.title}</h3>
+        <p className="text-sm text-gray-500">Publicado el {new Date(caseItem.createdAt).toLocaleDateString()}</p>
+      </div>
+      <p className="text-gray-600">{caseItem.description}</p>
+      <div className="flex items-center gap-3 text-sm text-gray-600">
+        <span className="flex items-center gap-1">
+          <Briefcase className="w-4 h-4 text-slate-700" />
+          {caseItem.status}
+        </span>
+        {caseItem.specialtyId && (
+          <span className="flex items-center gap-1">
+            <FileText className="w-4 h-4 text-slate-700" />
+            Especialidad #{caseItem.specialtyId}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+
+  const renderLawyerRecommendation = (lawyer: LawyerResource) => (
+    <div className="space-y-4">
+      <div>
+        <p className="text-xs uppercase tracking-wide text-slate-500 mb-1">Abogado recomendado</p>
+        <h3 className="text-2xl font-semibold text-gray-900">
+          {lawyer.fullName.firstname} {lawyer.fullName.lastname}
+        </h3>
+        <p className="text-sm text-gray-500">{lawyer.specialties?.join(", ") || "Generalista"}</p>
+      </div>
+      <p className="text-gray-600">{lawyer.description || "Este abogado aún no ha completado su descripción."}</p>
+      <div className="flex items-center gap-4 text-sm text-gray-600">
+        <span className="flex items-center gap-1">
+          <Phone className="w-4 h-4 text-slate-700" />
+          {lawyer.contactInfo.phone || "Sin teléfono"}
+        </span>
+        <span className="flex items-center gap-1">
+          <MapPin className="w-4 h-4 text-slate-700" />
+          {lawyer.contactInfo.address || "Sin dirección"}
+        </span>
+      </div>
+    </div>
+  )
 
   const profileCompleteness = user?.roles?.[0] === 'ROLE_LAWYER' ? 75 : 80
 
@@ -96,6 +256,66 @@ function Home() {
                 </div>
               )}
 
+
+              {/* Smart Recommendations */}
+              {user && (
+                <div className="bg-white rounded-lg shadow">
+                  <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-slate-500">
+                        {userRole === "ROLE_LAWYER" ? "Casos para ti" : "Abogados sugeridos"}
+                      </p>
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        {userRole === "ROLE_LAWYER" ? "Recomendaciones inteligentes" : "Conecta con especialistas"}
+                      </h2>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => user && loadRecommendations(user, userCases)}
+                      className="text-sm"
+                    >
+                      Actualizar
+                    </Button>
+                  </div>
+                  <div className="p-6">
+                    {loadingRecommendations ? (
+                      <div className="text-center text-gray-500">Buscando recomendaciones...</div>
+                    ) : recommendations.length === 0 || !currentRecommendation ? (
+                      <div className="text-center text-gray-500 text-sm">
+                        {userRole === "ROLE_LAWYER"
+                          ? "No hay casos sugeridos en este momento."
+                          : recommendationCase
+                          ? "No tenemos abogados disponibles para tu caso ahora mismo."
+                          : "Crea un caso para recibir sugerencias de abogados."}
+                      </div>
+                    ) : (
+                      <>
+                        {recommendationType === "cases" && "clientId" in currentRecommendation
+                          ? renderCaseRecommendation(currentRecommendation)
+                          : recommendationType === "lawyers" && "userId" in currentRecommendation
+                          ? renderLawyerRecommendation(currentRecommendation)
+                          : null}
+                        <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                          <Button variant="secondary" className="flex-1" onClick={handleRecommendationSkip}>
+                            Omitir
+                          </Button>
+                          <Button
+                            className="flex-1 bg-slate-900 hover:bg-slate-800"
+                            onClick={handleRecommendationAccept}
+                            disabled={recommendationActionLoading}
+                          >
+                            {recommendationType === "cases" ? "Me interesa" : "Invitar"}
+                          </Button>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">
+                          {currentRecommendationIndex + 1} de {recommendations.length}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* My Cases Preview */}
               <div className="bg-white rounded-lg shadow">
