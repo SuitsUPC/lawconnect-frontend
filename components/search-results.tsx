@@ -187,7 +187,7 @@ export default function SearchResults({ searchQuery, filters }: SearchResultsPro
 
                   <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
                     <MapPin className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                    <span className="text-gray-700">{lawyer.contactInfo.address || lawyer.contactInfo.phone || 'No disponible'}</span>
+                    <span className="text-gray-700">{lawyer.contactInfo.address || lawyer.contactInfo.phoneNumber || 'No disponible'}</span>
                   </div>
 
                   <div className="pt-2 border-t border-gray-100">

@@ -277,7 +277,7 @@ export default function PublicProfilePage() {
                     <p className="text-xs text-gray-500 font-medium uppercase">Teléfono</p>
                     <p className="text-base font-semibold text-gray-900">
                       {isLawyer && lawyerProfile 
-                        ? lawyerProfile.contactInfo.phone 
+                        ? lawyerProfile.contactInfo.phoneNumber 
                         : clientProfile?.contactInfo.phoneNumber || 'No disponible'}
                     </p>
                   </div>

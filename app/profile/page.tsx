@@ -67,7 +67,7 @@ function ProfilePage() {
           firstname: profile.fullName.firstname,
           lastname: profile.fullName.lastname,
           dni: profile.dni,
-          phoneNumber: profile.contactInfo.phone,
+          phoneNumber: profile.contactInfo.phoneNumber,
           address: profile.contactInfo.address,
           description: profile.description || "",
         })
@@ -154,7 +154,7 @@ function ProfilePage() {
         firstname: lawyerProfile.fullName.firstname,
         lastname: lawyerProfile.fullName.lastname,
         dni: lawyerProfile.dni,
-        phoneNumber: lawyerProfile.contactInfo.phone,
+        phoneNumber: lawyerProfile.contactInfo.phoneNumber,
         address: lawyerProfile.contactInfo.address,
         description: lawyerProfile.description || "",
       })
@@ -177,36 +177,53 @@ function ProfilePage() {
 
     try {
       setSaving(true)
-      
-      // Validaciones básicas
-      if (!editForm.firstname || !editForm.lastname || !editForm.dni) {
+
+      if (!editForm.firstname || !editForm.lastname || !editForm.dni || !editForm.phoneNumber || !editForm.address) {
         toast({
           title: "Campos requeridos",
-          description: "Por favor completa nombre, apellido y DNI",
+          description: "Completa nombre, apellido, DNI, teléfono y dirección",
           variant: "destructive",
         })
         return
       }
-      
-      // Si es abogado, actualizar perfil y especialidades
+
       if (user.roles?.[0] === 'ROLE_LAWYER') {
-        // TODO: Crear endpoint para actualizar perfil completo de abogado
-        await profilesService.updateLawyerSpecialties(user.id, selectedSpecialties)
+        await profilesService.updateLawyerProfile(user.id, {
+          firstname: editForm.firstname,
+          lastname: editForm.lastname,
+          dni: editForm.dni,
+          contactInfo: {
+            phoneNumber: editForm.phoneNumber,
+            address: editForm.address,
+          },
+          description: editForm.description,
+          specialties: selectedSpecialties,
+        })
         await loadLawyerProfile(user.id)
-        
+
         toast({
           title: "Perfil actualizado",
           description: "Tu información ha sido actualizada correctamente",
         })
       } else if (user.roles?.[0] === 'ROLE_CLIENT') {
-        // TODO: Crear endpoint para actualizar perfil de cliente
+        await profilesService.updateClientProfile(user.id, {
+          firstname: editForm.firstname,
+          lastname: editForm.lastname,
+          dni: editForm.dni,
+          contactInfo: {
+            phoneNumber: editForm.phoneNumber,
+            address: editForm.address,
+          },
+        })
+
+        await loadClientProfile(user.id)
+
         toast({
-          title: "Función en desarrollo",
-          description: "La actualización de perfil de cliente estará disponible próximamente",
-          variant: "destructive",
+          title: "Perfil actualizado",
+          description: "Tu información ha sido actualizada correctamente",
         })
       }
-      
+
       setIsEditing(false)
     } catch (error: any) {
       toast({
