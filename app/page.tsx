@@ -360,13 +360,12 @@ function Home() {
                 </div>
                 {user?.roles?.[0] !== 'ROLE_LAWYER' && (
                 <div className="p-4 bg-gray-50">
-                  <Button
-                    onClick={() => router.push("/cases/create")}
-                    className="w-full bg-slate-900 text-white py-2 text-sm font-medium hover:bg-slate-800 transition-colors"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Crear Nuevo Caso
-                  </Button>
+                  <Link href="/cases/create" aria-label="Crear nuevo caso" className="block">
+                    <Button className="w-full bg-slate-900 text-white h-12 text-sm font-semibold hover:bg-slate-800 transition-colors rounded-lg flex items-center justify-center gap-2">
+                      <Plus className="w-4 h-4" />
+                      <span>Crear Nuevo Caso</span>
+                    </Button>
+                  </Link>
                 </div>
                 )}
               </div>
@@ -433,23 +432,7 @@ function Home() {
                     Ver casos disponibles
                   </Button>
                 </div>
-              ) : (
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-gray-900">Encuentra Abogados</h3>
-                    <Users className="w-5 h-5 text-slate-700" />
-                </div>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Busca especialistas para tu caso legal
-                  </p>
-                  <Button
-                    onClick={() => router.push("/search")}
-                    className="w-full bg-slate-900 hover:bg-slate-800 text-white text-sm"
-                  >
-                    Buscar abogados
-                  </Button>
-                </div>
-              )}
+              ) : null}
 
               {/* Footer Info */}
               <div className="bg-white rounded-lg shadow p-6">

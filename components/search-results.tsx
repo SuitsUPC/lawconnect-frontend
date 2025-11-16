@@ -172,11 +172,7 @@ export default function SearchResults({ searchQuery, filters }: SearchResultsPro
                         <p className="text-sm text-gray-600">{specialtyDisplay}</p>
                       </div>
                     </div>
-                    <div className="ml-4 flex-shrink-0">
-                      <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium whitespace-nowrap">
-                        No disponible
-                      </span>
-                    </div>
+                    {/* Etiqueta de disponibilidad eliminada hasta tener dato real */}
                   </div>
 
                   {lawyer.description && (

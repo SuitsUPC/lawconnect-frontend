@@ -5,17 +5,15 @@ import { useRouter } from "next/navigation"
 import Navbar from "@/components/navbar"
 import { profilesService, type LawyerSpecialtyResource } from "@/lib/api"
 import SearchResults from "@/components/search-results"
-import { Search, MapPin } from "lucide-react"
+import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
 function SearchPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
-  const [locationQuery, setLocationQuery] = useState("")
   const [specializations, setSpecializations] = useState<LawyerSpecialtyResource[]>([])
   const [selectedSpecialization, setSelectedSpecialization] = useState<string>("all")
-  const [selectedLocation, setSelectedLocation] = useState<string>("")
 
   useEffect(() => {
     const token = localStorage.getItem("authToken")
@@ -60,11 +58,8 @@ function SearchPage() {
     return specialtyMap[specialty] || specialty
   }
 
-  const locations = ["Madrid", "Barcelona", "Valencia", "Sevilla", "Bilbao", "Málaga", "Alicante", "Online"]
-
   const filters = {
     specialization: selectedSpecialization,
-    location: selectedLocation,
   }
 
   return (
@@ -86,16 +81,6 @@ function SearchPage() {
                   placeholder="Buscar por nombre, especialidad..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-12 bg-white border-gray-300 text-gray-900 placeholder-gray-500 text-base rounded-lg"
-                />
-              </div>
-              <div className="relative md:w-64">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder="Ubicación..."
-                  value={locationQuery}
-                  onChange={(e) => setLocationQuery(e.target.value)}
                   className="pl-12 h-12 bg-white border-gray-300 text-gray-900 placeholder-gray-500 text-base rounded-lg"
                 />
               </div>
@@ -149,28 +134,7 @@ function SearchPage() {
                   </div>
                 </div>
 
-                {/* Location Filter */}
-                <div className="border-t border-gray-200 pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-slate-700" />
-                    Ubicación
-                  </h3>
-                  <div className="space-y-2">
-                    {locations.map((location) => (
-                      <label key={location} className="flex items-center gap-3 cursor-pointer group">
-                        <input
-                          type="radio"
-                          name="location"
-                          value={location}
-                          checked={selectedLocation === location}
-                          onChange={(e) => setSelectedLocation(e.target.value)}
-                          className="w-4 h-4 rounded-full border-gray-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
-                        />
-                        <span className="text-sm text-gray-700 group-hover:text-slate-900 transition-colors">{location}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
+                {/* Se eliminó el filtro de Ubicación */}
               </div>
             </div>
 

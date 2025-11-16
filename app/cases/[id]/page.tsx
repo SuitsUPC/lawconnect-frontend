@@ -637,6 +637,33 @@ function CaseDetailPage() {
     }
   }
 
+  const handleCloseCase = async () => {
+    const currentUser = authService.getCurrentUser()
+    if (!currentUser || !caseData) return
+    if (!isOwner) return
+
+    const confirmed = window.confirm("¿Seguro que quieres cerrar este caso? Esta acción marcará el caso como Cerrado.")
+    if (!confirmed) return
+
+    try {
+      setSubmitting(true)
+      const updated = await casesService.closeCase(caseData.id, currentUser.id)
+      setCaseData(updated)
+      toast({
+        title: "Caso cerrado",
+        description: "El caso fue marcado como Cerrado.",
+      })
+    } catch (error: any) {
+      toast({
+        title: "No se pudo cerrar el caso",
+        description: error.response?.data?.message || "Intenta nuevamente más tarde.",
+        variant: "destructive",
+      })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const getStatusColor = (status: string) => {
     const statusMap: { [key: string]: string } = {
       OPEN: "bg-blue-50 text-blue-700 border-blue-200",
@@ -783,6 +810,20 @@ function CaseDetailPage() {
                 </div>
               </div>
             )}
+
+            {/* Acciones del Propietario */}
+            {isOwner && (caseData.status !== 'CLOSED' && caseData.status !== 'CANCELED') && (
+              <div className="mt-4 pt-4 border-t border-gray-200 flex justify-end">
+                <Button
+                  onClick={handleCloseCase}
+                  disabled={submitting}
+                  variant="secondary"
+                  className="bg-slate-900 text-white hover:bg-slate-800"
+                >
+                  Cerrar Caso
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Tabs */}
@@ -854,42 +895,7 @@ function CaseDetailPage() {
               {/* Overview Tab */}
               {activeTab === 'overview' && (
                 <div className="space-y-6">
-                  {/* Estadísticas del Caso */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Resumen de Actividad</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <div className="flex items-center gap-2 mb-2">
-                          <FileText className="w-5 h-5 text-blue-600" />
-                          <p className="text-sm text-gray-600">Documentos</p>
-                        </div>
-                        <p className="text-2xl font-bold text-blue-900">{documents.length}</p>
-                      </div>
-                      <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                        <div className="flex items-center gap-2 mb-2">
-                          <MessageSquare className="w-5 h-5 text-purple-600" />
-                          <p className="text-sm text-gray-600">Comentarios</p>
-                        </div>
-                        <p className="text-2xl font-bold text-purple-900">{comments.length}</p>
-                      </div>
-                      <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                        <div className="flex items-center gap-2 mb-2">
-                          <User className="w-5 h-5 text-yellow-600" />
-                          <p className="text-sm text-gray-600">Postulaciones</p>
-                        </div>
-                        <p className="text-2xl font-bold text-yellow-900">{applications.length}</p>
-                      </div>
-                      <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Clock className="w-5 h-5 text-green-600" />
-                          <p className="text-sm text-gray-600">Días activo</p>
-                        </div>
-                        <p className="text-2xl font-bold text-green-900">
-                          {Math.floor((new Date().getTime() - new Date(caseData.createdAt).getTime()) / (1000 * 60 * 60 * 24))}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  {/* Se eliminó el bloque de resumen de actividad */}
 
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">Información del Caso</h3>
@@ -1183,11 +1189,6 @@ function CaseDetailPage() {
               {/* Messages Tab */}
               {activeTab === 'messages' && (
                 <div className="space-y-4">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p className="text-sm text-blue-800">
-                      <strong>Chat privado</strong> entre cliente y abogado asignado
-                    </p>
-                  </div>
 
                   {/* Messages List */}
                   <div className="space-y-4 max-h-96 overflow-y-auto p-4 bg-gray-50 rounded-lg">
