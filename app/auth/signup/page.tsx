@@ -19,6 +19,10 @@ function SignupPage() {
     password: "",
     confirmPassword: "",
     userType: "ROLE_CLIENT", // ROLE_CLIENT o ROLE_LAWYER
+    firstname: "",
+    lastname: "",
+    phoneNumber: "",
+    dni: "",
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -47,6 +51,10 @@ function SignupPage() {
         username: formData.username,
         password: formData.password,
         role: formData.userType, // El backend espera 'role' como string, no 'roles' como array
+        firstname: formData.firstname,
+        lastname: formData.lastname,
+        phoneNumber: formData.phoneNumber,
+        dni: formData.dni,
       })
 
       toast({
@@ -77,6 +85,67 @@ function SignupPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nombre
+              </label>
+              <Input
+                type="text"
+                name="firstname"
+                value={formData.firstname}
+                onChange={handleChange}
+                placeholder="Tu nombre"
+                className="w-full bg-gray-50 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-slate-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Apellido
+              </label>
+              <Input
+                type="text"
+                name="lastname"
+                value={formData.lastname}
+                onChange={handleChange}
+                placeholder="Tu apellido"
+                className="w-full bg-gray-50 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-slate-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                DNI
+              </label>
+              <Input
+                type="text"
+                name="dni"
+                value={formData.dni}
+                onChange={handleChange}
+                placeholder="12345678"
+                className="w-full bg-gray-50 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-slate-900"
+                required
+                maxLength={8}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Teléfono
+              </label>
+              <Input
+                type="tel"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                placeholder="+51 987654321"
+                className="w-full bg-gray-50 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-slate-900"
+                required
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Usuario

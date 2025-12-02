@@ -214,10 +214,18 @@ export default function PublicProfilePage() {
             <div className="px-8 pb-8">
               {/* Avatar & Edit Button Row */}
               <div className="flex items-end justify-between -mt-16 mb-6">
-                <div className="w-32 h-32 bg-white rounded-2xl shadow-lg border-4 border-white flex items-center justify-center">
-                  <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl flex items-center justify-center text-white text-4xl font-bold">
-                    {profile.fullName.firstname[0]}{profile.fullName.lastname[0]}
-                  </div>
+                <div className="w-32 h-32 bg-white rounded-2xl shadow-lg border-4 border-white flex items-center justify-center overflow-hidden">
+                  {profile.profilePictureUrl ? (
+                    <img 
+                      src={profile.profilePictureUrl} 
+                      alt={`${profile.fullName.firstname} ${profile.fullName.lastname}`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl flex items-center justify-center text-white text-4xl font-bold">
+                      {profile.fullName.firstname[0]}{profile.fullName.lastname[0]}
+                    </div>
+                  )}
                 </div>
                 {isOwner && (
                   <Button

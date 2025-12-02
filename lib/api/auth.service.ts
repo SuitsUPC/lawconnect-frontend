@@ -4,6 +4,10 @@ export interface SignUpRequest {
   username: string;
   password: string;
   role: string; // El backend espera 'role' (singular) como string, no 'roles' (plural) como array
+  firstname: string;
+  lastname: string;
+  phoneNumber: string;
+  dni: string;
 }
 
 export interface SignInRequest {

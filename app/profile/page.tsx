@@ -30,7 +30,10 @@ function ProfilePage() {
     phoneNumber: "",
     address: "",
     description: "",
+    profilePictureUrl: "",
   })
+  const [profileImage, setProfileImage] = useState<string | null>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
 
   useEffect(() => {
     if (!authService.isAuthenticated()) {
@@ -70,7 +73,9 @@ function ProfilePage() {
           phoneNumber: profile.contactInfo.phoneNumber,
           address: profile.contactInfo.address,
           description: profile.description || "",
+          profilePictureUrl: profile.profilePictureUrl || "",
         })
+        setProfileImage(profile.profilePictureUrl || null)
       }
     } catch (error) {
       console.error("Error loading lawyer profile:", error)
@@ -91,7 +96,9 @@ function ProfilePage() {
           phoneNumber: profile.contactInfo.phoneNumber,
           address: profile.contactInfo.address,
           description: "",
+          profilePictureUrl: profile.profilePictureUrl || "",
         })
+        setProfileImage(profile.profilePictureUrl || null)
       }
     } catch (error) {
       console.error("Error loading client profile:", error)
@@ -157,8 +164,10 @@ function ProfilePage() {
         phoneNumber: lawyerProfile.contactInfo.phoneNumber,
         address: lawyerProfile.contactInfo.address,
         description: lawyerProfile.description || "",
+        profilePictureUrl: lawyerProfile.profilePictureUrl || "",
       })
       setSelectedSpecialties(lawyerProfile.specialties || [])
+      setProfileImage(lawyerProfile.profilePictureUrl || null)
     } else if (user?.roles?.[0] === 'ROLE_CLIENT' && clientProfile) {
       setEditForm({
         firstname: clientProfile.fullName.firstname,
@@ -167,7 +176,9 @@ function ProfilePage() {
         phoneNumber: clientProfile.contactInfo.phoneNumber,
         address: clientProfile.contactInfo.address,
         description: "",
+        profilePictureUrl: clientProfile.profilePictureUrl || "",
       })
+      setProfileImage(clientProfile.profilePictureUrl || null)
     }
     setIsEditing(false)
   }
@@ -198,6 +209,7 @@ function ProfilePage() {
           },
           description: editForm.description,
           specialties: selectedSpecialties,
+          profilePictureUrl: editForm.profilePictureUrl,
         })
         await loadLawyerProfile(user.id)
 
@@ -214,6 +226,7 @@ function ProfilePage() {
             phoneNumber: editForm.phoneNumber,
             address: editForm.address,
           },
+          profilePictureUrl: editForm.profilePictureUrl,
         })
 
         await loadClientProfile(user.id)
@@ -244,6 +257,42 @@ function ProfilePage() {
         return [...prev, specialty]
       }
     })
+  }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validar que sea una imagen
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Error",
+          description: "Por favor selecciona un archivo de imagen válido",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "La imagen es demasiado grande. Máximo 5MB",
+          variant: "destructive",
+        })
+        return
+      }
+
+      setImageFile(file)
+      
+      // Convertir a base64 para preview
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64String = reader.result as string
+        setProfileImage(base64String)
+        setEditForm({ ...editForm, profilePictureUrl: base64String })
+      }
+      reader.readAsDataURL(file)
+    }
   }
 
   const getSpecialtyDisplayName = (specialty: string) => {
@@ -345,10 +394,31 @@ function ProfilePage() {
             <div className="px-8 pb-8">
               {/* Avatar & Edit Button Row */}
               <div className="flex items-end justify-between -mt-16 mb-6">
-                <div className="w-32 h-32 bg-white rounded-2xl shadow-lg border-4 border-white flex items-center justify-center">
-                  <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl flex items-center justify-center text-white text-4xl font-bold">
-                    {editForm.firstname[0]}{editForm.lastname[0]}
+                <div className="relative">
+                  <div className="w-32 h-32 bg-white rounded-2xl shadow-lg border-4 border-white flex items-center justify-center overflow-hidden">
+                    {profileImage ? (
+                      <img 
+                        src={profileImage} 
+                        alt={`${editForm.firstname} ${editForm.lastname}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl flex items-center justify-center text-white text-4xl font-bold">
+                        {editForm.firstname[0]}{editForm.lastname[0]}
+                      </div>
+                    )}
                   </div>
+                  {isEditing && (
+                    <label className="absolute bottom-0 right-0 bg-slate-900 text-white p-2 rounded-full cursor-pointer hover:bg-slate-800 transition-colors shadow-lg">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                      <Edit2 className="w-4 h-4" />
+                    </label>
+                  )}
                 </div>
                 {!isEditing ? (
                   <Button

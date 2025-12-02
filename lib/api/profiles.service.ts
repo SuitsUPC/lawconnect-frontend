@@ -22,6 +22,7 @@ export interface UpdateLawyerProfileRequest {
   contactInfo: ContactInfoPayload
   description: string
   specialties: string[]
+  profilePictureUrl?: string
 }
 
 export interface LawyerResource {
@@ -38,6 +39,7 @@ export interface LawyerResource {
   }
   description: string
   specialties: string[]
+  profilePictureUrl?: string
 }
 
 export interface CreateClientRequest {
@@ -53,6 +55,7 @@ export interface UpdateClientProfileRequest {
   lastname: string
   dni: string
   contactInfo: ContactInfoPayload
+  profilePictureUrl?: string
 }
 
 export interface ClientResource {
@@ -67,6 +70,7 @@ export interface ClientResource {
     phoneNumber: string
     address: string
   }
+  profilePictureUrl?: string
 }
 
 export interface LawyerSpecialtyResource {
